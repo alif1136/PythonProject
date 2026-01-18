@@ -2,82 +2,77 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import time
 
-# ---------- Browser Setup ----------
-options = Options()
-options.add_experimental_option("detach", True)
-driver = webdriver.Chrome(options=options)
-wait = WebDriverWait(driver, 15)
+v = Options()
+v.add_experimental_option("detach", True)
 
+driver = webdriver.Chrome(options=v)
+driver.implicitly_wait(10)
+
+# Website open
 driver.get("https://carwebsite-five.vercel.app/login")
+time.sleep(2)
 
-# ---------- LOGIN ----------
-wait.until(EC.presence_of_element_located((By.NAME, "email"))).send_keys(
-    "junayetshiblu09@gmail.com"
-)
+# ---------- Login ----------
+driver.find_element(By.NAME, "email").send_keys("junayetshiblu09@gmail.com")
+time.sleep(1)
+
 driver.find_element(By.NAME, "password").send_keys("123456")
+time.sleep(1)
+
 driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+time.sleep(3)   # login successful dekhte
 
-# ---------- WAIT FOR DASHBOARD ----------
-wait.until(EC.presence_of_element_located(
-    (By.CSS_SELECTOR, "input[placeholder*='Search']")
-))
+# ---------- Search ----------
+search_box = driver.find_element(
+    By.CSS_SELECTOR,
+    "input[placeholder='Search luxury cars, brands, models...']"
+)
+search_box.send_keys("Honda")
+time.sleep(1)
 
-# ---------- SEARCH & ADD MULTIPLE PRODUCTS ----------
-cars = ["Honda", "BMW", "Audi"]
+search_box.send_keys(Keys.ENTER)
+time.sleep(3)   # search result dekhte
 
-for car in cars:
-    search_box = wait.until(EC.element_to_be_clickable(
-        (By.CSS_SELECTOR, "input[placeholder*='Search']")
-    ))
-    search_box.clear()
-    search_box.send_keys(car)
-    search_box.send_keys(Keys.ENTER)
+# ---------- Product Click ----------
+product = driver.find_element(
+    By.CSS_SELECTOR,
+    "a[href='/allproduct/67b6c0949192e5b68df248ef']"
+)
+product.click()
+time.sleep(3)
 
-    # wait product list
-    product = wait.until(EC.element_to_be_clickable(
-        (By.CSS_SELECTOR, "a[href^='/allproduct/']")
-    ))
-    product.click()
+# ---------- Add To Cart ----------
+add_to_cart = driver.find_element(
+    By.XPATH, "//button[contains(text(), 'Add To Cart')]"
+)
+add_to_cart.click()
+time.sleep(2)
 
-    add_to_cart = wait.until(EC.element_to_be_clickable(
-        (By.XPATH, "//button[contains(text(),'Add To Cart')]")
-    ))
-    add_to_cart.click()
-
-    time.sleep(2)
-    driver.back()
-    time.sleep(2)
-
-# ---------- GO TO CART ----------
-cart_button = wait.until(EC.element_to_be_clickable(
-    (By.CSS_SELECTOR, "a[href='/cart']")
-))
+# ---------- Cart ----------
+cart_button = driver.find_element(By.CSS_SELECTOR, "a[href='/cart']")
 cart_button.click()
+time.sleep(3)
 
-# ---------- REMOVE ALL ITEMS ----------
-while True:
-    try:
-        remove_button = wait.until(EC.element_to_be_clickable(
-            (By.CSS_SELECTOR, "button[aria-label='Remove item']")
-        ))
-        remove_button.click()
-        time.sleep(1)
-    except:
-        break
+# ---------- Remove Item ----------
+del_button = driver.find_element(
+    By.CSS_SELECTOR, "button[aria-label='Remove item']"
+)
+del_button.click()
+time.sleep(2)
 
-# ---------- LOGOUT ----------
-profile_btn = wait.until(EC.element_to_be_clickable(
-    (By.CSS_SELECTOR, "button[aria-label='profile']")
-))
-profile_btn.click()
-
-logout_btn = wait.until(EC.element_to_be_clickable(
-    (By.XPATH, "//button[contains(text(),'Logout')]")
-))
+# ---------- Logout ------
+driver.find_element(
+    By.XPATH,
+    "//span[contains(@class,'bg-muted')]"
+).click()
+time.sleep(3)
+logout_btn = driver.find_element(
+    By.XPATH, "//div[contains(text(),'Logout')]"
+)
 logout_btn.click()
 
-print("✅ TEST COMPLETED SUCCESSFULLY")
+time.sleep(2)
+
+print("✅ Test completed successfully")
